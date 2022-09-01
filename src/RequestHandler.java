@@ -18,20 +18,14 @@ public class RequestHandler extends Thread {
 
 	private ProxyServer server;
 
-
 	public RequestHandler(Socket clientSocket, ProxyServer proxyServer) {
-
-		
 		this.clientSocket = clientSocket;
-		
-
 		this.server = proxyServer;
 
 		try {
 			clientSocket.setSoTimeout(2000);
 			inFromClient = clientSocket.getInputStream();
 			outToClient = clientSocket.getOutputStream();
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -40,9 +34,7 @@ public class RequestHandler extends Thread {
 
 	
 	@Override
-	
 	public void run() {
-
 		/**
 			 * To do
 			 * Process the requests from a client. In particular, 
@@ -85,34 +77,26 @@ public class RequestHandler extends Thread {
 	
 	// Sends the cached content stored in the cache file to the client
 	private void sendCachedInfoToClient(String fileName) {
-
 		try {
-
 			byte[] bytes = Files.readAllBytes(Paths.get(fileName));
-
 			outToClient.write(bytes);
 			outToClient.flush();
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		try {
-
 			if (clientSocket != null) {
 				clientSocket.close();
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
-
 		}
 	}
 	
 	
 	// Generates a random file name  
 	public String generateRandomFileName() {
-
 		String ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
 		SecureRandom RANDOM = new SecureRandom();
 		StringBuilder sb = new StringBuilder();
@@ -122,5 +106,4 @@ public class RequestHandler extends Thread {
 		}
 		return sb.toString();
 	}
-
 }

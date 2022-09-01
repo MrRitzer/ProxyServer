@@ -14,17 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 public class ProxyServer {
-
 	//cache is a Map: the key is the URL and the value is the file name of the file that stores the cached content
 	Map<String, String> cache;
 	
 	ServerSocket proxySocket;
 
 	String logFileName = "log.txt";
-
-	public static void main(String[] args) {
-		new ProxyServer().startServer(Integer.parseInt(args[0]));
-	}
 
 	void startServer(int proxyPort) {
 
@@ -46,8 +41,6 @@ public class ProxyServer {
  
 		
 	}
-
-
 
 	public String getCache(String hashcode) {
 		return cache.get(hashcode);
