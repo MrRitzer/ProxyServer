@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 
-
 // RequestHandler is thread that process requests of one client connection
 public class RequestHandler extends Thread {	
 	Socket clientSocket;
@@ -49,7 +48,6 @@ public class RequestHandler extends Thread {
 
 	
 	private void proxyServertoClient(byte[] clientRequest) {
-
 		FileOutputStream fileWriter = null;
 		Socket toWebServerSocket = null;
 		InputStream inFromServer;
