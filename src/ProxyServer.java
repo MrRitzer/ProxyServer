@@ -38,8 +38,6 @@ public class ProxyServer {
 			 * remember to catch Exceptions!
 			 *
 		*/
- 
-		
 	}
 
 	public String getCache(String hashcode) {
