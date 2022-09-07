@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -19,18 +18,32 @@ public class ProxyServer {
 	
 	ServerSocket proxySocket;
 
+	Boolean running;
+
 	String logFileName = "log.txt";
 
 	void startServer(int proxyPort) {
-
 		cache = new ConcurrentHashMap<>();
-
 		// create the directory to store cached files. 
 		File cacheDir = new File("cached");
 		if (!cacheDir.exists() || (cacheDir.exists() && !cacheDir.isDirectory())) {
 			cacheDir.mkdirs();
 		}
 
+		try {
+			this.proxySocket = new ServerSocket(proxyPort);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("Listening for connection: ");
+		while (true) {
+			try {
+                new RequestHandler( proxySocket.accept(), this );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+		}
 		/**
 			 * To do:
 			 * create a serverSocket to listen on the port (proxyPort)
@@ -38,6 +51,14 @@ public class ProxyServer {
 			 * remember to catch Exceptions!
 			 *
 		*/
+	}
+
+	void stopServer() {
+		try {
+			this.proxySocket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public String getCache(String hashcode) {

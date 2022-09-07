@@ -8,32 +8,52 @@ import java.security.SecureRandom;
 // RequestHandler is thread that process requests of one client connection
 public class RequestHandler extends Thread {	
 	Socket clientSocket;
-
 	InputStream inFromClient;
-
 	OutputStream outToClient;
-	
-	byte[] request = new byte[1024];
-
 	private ProxyServer server;
 
 	public RequestHandler(Socket clientSocket, ProxyServer proxyServer) {
 		this.clientSocket = clientSocket;
 		this.server = proxyServer;
-
 		try {
-			clientSocket.setSoTimeout(2000);
-			inFromClient = clientSocket.getInputStream();
-			outToClient = clientSocket.getOutputStream();
-		} catch (Exception e) {
+			this.inFromClient = clientSocket.getInputStream();
+			this.outToClient = clientSocket.getOutputStream();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		this.start();
 	}
-
 	
 	@Override
 	public void run() {
+		try {
+			byte[] request_bytes = new byte[1024];
+			BufferedReader in = new BufferedReader(new InputStreamReader(inFromClient));
+			String host = "";
+			RequestType requestType = RequestType.NONE;
+          
+			int num_bytes = inFromClient.read(request_bytes);
+			String request_string = new String(request_bytes, 0, num_bytes);
+			if (request_string.contains("Host:")) {
+				String temp[];
+				temp = request_string.split(" ");
+				host = temp[1];
+			}
+			if (request_string.contains("GET")) {
+				requestType = RequestType.GET;
+			}
+			Connection connection = new Connection(host, requestType, clientSocket.getInetAddress());
+			if (connection.isValid()) {
+				System.out.println(connection);
+				this.server.writeLog(connection.getLogEntry());
+			}
+			// Close our connection
+			in.close();
+			clientSocket.close();
+		}
+		catch( Exception e ) {
+			e.printStackTrace();
+		}
 		/**
 			 * To do
 			 * Process the requests from a client. In particular, 
