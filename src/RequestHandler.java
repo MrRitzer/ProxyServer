@@ -5,61 +5,74 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 
-// RequestHandler is thread that process requests of one client connection
-public class RequestHandler extends Thread {
-	Socket clientSocket;
-
-	InputStream inFromClient;
-
-	OutputStream outToClient;
-
-	byte[] request = new byte[1024];
-
+public class RequestHandler extends Thread {	
+	private Socket clientSocket;
+	private InputStream inFromClient;
+	private OutputStream outToClient;
 	private ProxyServer server;
+	private Connection connection;
 
 	public RequestHandler(Socket clientSocket, ProxyServer proxyServer) {
 		this.clientSocket = clientSocket;
 		this.server = proxyServer;
-
+		connection = new Connection();
 		try {
-			clientSocket.setSoTimeout(2000);
-			inFromClient = clientSocket.getInputStream();
-			outToClient = clientSocket.getOutputStream();
-		} catch (Exception e) {
+			this.inFromClient = clientSocket.getInputStream();
+			this.outToClient = clientSocket.getOutputStream();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		this.start();
 	}
-
+	
 	@Override
 	public void run() {
-		
-		/**
-		 * To do
-		 * Process the requests from a client. In particular,
-		 * (1) Check the request type, only process GET request and ignore others
-		 * (2) Write log.
-		 * (3) If the url of GET request has been cached, respond with cached content
-		 * (4) Otherwise, call method proxyServertoClient to process the GET request
-		 *
-		 */
-
+		try {
+			byte[] request_bytes = new byte[1024];
+			BufferedReader in = new BufferedReader(new InputStreamReader(inFromClient));
+			int num_bytes = inFromClient.read(request_bytes);
+			String request_string = new String(request_bytes, 0, num_bytes);
+			if (request_string.contains("Host:") && request_string.contains("GET")) {
+				connection = new Connection((request_string.split(" "))[1],RequestType.GET,clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
+			}
+			if (connection.isValid()) {
+				System.out.println(connection);
+				server.writeLog(connection.getLogEntry());
+				if (server.getCache(connection.getHost()) == null) {
+					proxyServertoClient(request_bytes);
+				} else {
+					sendCachedInfoToClient(server.getCache(connection.getHost()));
+				}
+			}
+			// Close our connection
+			in.close();
+			clientSocket.close();
+		}
+		catch( Exception e ) {
+			e.printStackTrace();
+		}
 	}
 
 	private void proxyServertoClient(byte[] clientRequest) {
-		FileOutputStream fileWriter = null;
-		Socket toWebServerSocket = null;
-		InputStream inFromServer;
-		OutputStream outToServer;
-
-		// Create Buffered output stream to write to cached copy of file
-		String fileName = "cached/" + generateRandomFileName() + ".dat";
-
-		// to handle binary content, byte is used
-		byte[] serverReply = new byte[4096];
-
-		// Connect to the server
-
+		try {
+			Socket toWebServerSocket = new Socket(connection.getHost(),80);
+			InputStream inFromServer = toWebServerSocket.getInputStream();
+			OutputStream outToServer = toWebServerSocket.getOutputStream();
+			// Create Buffered output stream to write to cached copy of file
+			String fileName = "cached/" + generateRandomFileName() + ".dat";
+			File file = new File(fileName);
+			FileOutputStream fileWriter = new FileOutputStream(file);
+			// to handle binary content, byte is used
+			byte[] serverReply = new byte[4096];
+			outToServer.write(clientRequest);
+			serverReply = inFromServer.readAllBytes();
+			fileWriter.write(serverReply);
+			fileWriter.close();
+			inFromServer.close();
+			outToServer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}			
 		/**
 		 * To do
 		 * (1) Create a socket to connect to the web server (default port 80)
@@ -83,17 +96,9 @@ public class RequestHandler extends Thread {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		try {
-			if (clientSocket != null) {
-				clientSocket.close();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
-
-	// Generates a random file name
+	
+	// Generates a random file name  
 	public String generateRandomFileName() {
 		String ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
 		SecureRandom RANDOM = new SecureRandom();
