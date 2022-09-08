@@ -28,15 +28,19 @@ public class Connection {
     }
 
     public Boolean isValid() {
-        return host != "" && request != RequestType.NONE;
+        try {
+            return host != "" && request != RequestType.NONE;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public String getLogEntry() {
-        return new SimpleDateFormat("MMM dd YYYY HH:mm:ss", Locale.US).format(this.date) + " " + this.address + " " + this.host;
+        return new SimpleDateFormat("MMM dd YYYY HH:mm:ss", Locale.US).format(date) + " " + address + " " + host;
     }
 
     @Override
     public String toString() {
-        return "Host: " + host + "\nRequest: " + request + "\nAddress: " + this.address + "\nPort: " + this.port;
+        return "Host: " + host + "\nRequest: " + request + "\nAddress: " + address + "\nPort: " + port;
     }
 }

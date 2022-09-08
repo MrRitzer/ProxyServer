@@ -29,7 +29,7 @@ public class ProxyServer {
 		}
 
 		try {
-			this.proxySocket = new ServerSocket(proxyPort);
+			proxySocket = new ServerSocket(proxyPort);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

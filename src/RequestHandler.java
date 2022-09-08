@@ -5,16 +5,17 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 
-// RequestHandler is thread that process requests of one client connection
 public class RequestHandler extends Thread {	
-	Socket clientSocket;
-	InputStream inFromClient;
-	OutputStream outToClient;
+	private Socket clientSocket;
+	private InputStream inFromClient;
+	private OutputStream outToClient;
 	private ProxyServer server;
+	private Connection connection;
 
 	public RequestHandler(Socket clientSocket, ProxyServer proxyServer) {
 		this.clientSocket = clientSocket;
 		this.server = proxyServer;
+		connection = new Connection();
 		try {
 			this.inFromClient = clientSocket.getInputStream();
 			this.outToClient = clientSocket.getOutputStream();
@@ -29,7 +30,6 @@ public class RequestHandler extends Thread {
 		try {
 			byte[] request_bytes = new byte[1024];
 			BufferedReader in = new BufferedReader(new InputStreamReader(inFromClient));
-			Connection connection = new Connection();
 			int num_bytes = inFromClient.read(request_bytes);
 			String request_string = new String(request_bytes, 0, num_bytes);
 			if (request_string.contains("Host:") && request_string.contains("GET")) {
@@ -37,11 +37,11 @@ public class RequestHandler extends Thread {
 			}
 			if (connection.isValid()) {
 				System.out.println(connection);
-				this.server.writeLog(connection.getLogEntry());
-				if (this.server.getCache(connection.getHost()) == null) {
-					
+				server.writeLog(connection.getLogEntry());
+				if (server.getCache(connection.getHost()) == null) {
+					proxyServertoClient(request_bytes);
 				} else {
-					System.out.println("Cached");
+					sendCachedInfoToClient(server.getCache(connection.getHost()));
 				}
 			}
 			// Close our connection
@@ -51,31 +51,29 @@ public class RequestHandler extends Thread {
 		catch( Exception e ) {
 			e.printStackTrace();
 		}
-		/**
-			 * To do
-			 * Process the requests from a client. In particular, 
-			 * (1) Check the request type, only process GET request and ignore others
-			 * (2) Write log.
-			 * (3) If the url of GET request has been cached, respond with cached content
-			 * (4) Otherwise, call method proxyServertoClient to process the GET request
-		*/
-
 	}
 
 	
 	private void proxyServertoClient(byte[] clientRequest) {
-		FileOutputStream fileWriter = null;
-		Socket toWebServerSocket = null;
-		InputStream inFromServer;
-		OutputStream outToServer;
-		
-		// Create Buffered output stream to write to cached copy of file
-		String fileName = "cached/" + generateRandomFileName() + ".dat";
-		
-		// to handle binary content, byte is used
-		byte[] serverReply = new byte[4096];
-		
-			
+		try {
+			Socket toWebServerSocket = new Socket(connection.getHost(),80);
+			InputStream inFromServer = toWebServerSocket.getInputStream();
+			OutputStream outToServer = toWebServerSocket.getOutputStream();
+			// Create Buffered output stream to write to cached copy of file
+			String fileName = "cached/" + generateRandomFileName() + ".dat";
+			File file = new File(fileName);
+			FileOutputStream fileWriter = new FileOutputStream(file);
+			// to handle binary content, byte is used
+			byte[] serverReply = new byte[4096];
+			outToServer.write(clientRequest);
+			serverReply = inFromServer.readAllBytes();
+			fileWriter.write(serverReply);
+			fileWriter.close();
+			inFromServer.close();
+			outToServer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}			
 		/**
 		 * To do
 		 * (1) Create a socket to connect to the web server (default port 80)
