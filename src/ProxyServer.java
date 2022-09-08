@@ -8,9 +8,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
 
 public class ProxyServer {
@@ -49,6 +52,9 @@ public class ProxyServer {
 	}
 
 	public synchronized void writeLog(String info) {
+
+
+
 		
 			/**
 			 * To do
