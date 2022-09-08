@@ -1,4 +1,3 @@
-import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -7,14 +6,18 @@ public class Connection {
     private String host;
     private RequestType request;
     private Date date;
-    private InetAddress address;
+    private String address;
+    private int port;
 
-    public Connection(String host, RequestType request, InetAddress address) {
+    public Connection(String host, RequestType request, String address, int port) {
         this.host = host;
         this.request = request;
         this.date = new Date();
         this.address = address;
+        this.port = port;
     }
+
+    public Connection() { }
 
     public String getHost() {
         return host;
@@ -29,11 +32,11 @@ public class Connection {
     }
 
     public String getLogEntry() {
-        return new SimpleDateFormat("MMM dd YYYY HH:mm:ss", Locale.US).format(this.date) + " " + this.address.getHostAddress() + " " + this.host;
+        return new SimpleDateFormat("MMM dd YYYY HH:mm:ss", Locale.US).format(this.date) + " " + this.address + " " + this.host;
     }
 
     @Override
     public String toString() {
-        return "Host: " + host + "\nRequest: " + request + "\nAddress: " + this.address.getHostAddress();
+        return "Host: " + host + "\nRequest: " + request + "\nAddress: " + this.address + "\nPort: " + this.port;
     }
 }

@@ -29,23 +29,20 @@ public class RequestHandler extends Thread {
 		try {
 			byte[] request_bytes = new byte[1024];
 			BufferedReader in = new BufferedReader(new InputStreamReader(inFromClient));
-			String host = "";
-			RequestType requestType = RequestType.NONE;
-          
+			Connection connection = new Connection();
 			int num_bytes = inFromClient.read(request_bytes);
 			String request_string = new String(request_bytes, 0, num_bytes);
-			if (request_string.contains("Host:")) {
-				String temp[];
-				temp = request_string.split(" ");
-				host = temp[1];
+			if (request_string.contains("Host:") && request_string.contains("GET")) {
+				connection = new Connection((request_string.split(" "))[1],RequestType.GET,clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
 			}
-			if (request_string.contains("GET")) {
-				requestType = RequestType.GET;
-			}
-			Connection connection = new Connection(host, requestType, clientSocket.getInetAddress());
 			if (connection.isValid()) {
 				System.out.println(connection);
 				this.server.writeLog(connection.getLogEntry());
+				if (this.server.getCache(connection.getHost()) == null) {
+					
+				} else {
+					System.out.println("Cached");
+				}
 			}
 			// Close our connection
 			in.close();
@@ -58,10 +55,9 @@ public class RequestHandler extends Thread {
 			 * To do
 			 * Process the requests from a client. In particular, 
 			 * (1) Check the request type, only process GET request and ignore others
-                         * (2) Write log.
+			 * (2) Write log.
 			 * (3) If the url of GET request has been cached, respond with cached content
 			 * (4) Otherwise, call method proxyServertoClient to process the GET request
-			 *
 		*/
 
 	}
@@ -102,16 +98,7 @@ public class RequestHandler extends Thread {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		try {
-			if (clientSocket != null) {
-				clientSocket.close();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
-	
 	
 	// Generates a random file name  
 	public String generateRandomFileName() {

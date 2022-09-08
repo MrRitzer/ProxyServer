@@ -6,8 +6,6 @@ import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,21 +41,6 @@ public class ProxyServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-		}
-		/**
-			 * To do:
-			 * create a serverSocket to listen on the port (proxyPort)
-			 * Create a thread (RequestHandler) for each new client connection 
-			 * remember to catch Exceptions!
-			 *
-		*/
-	}
-
-	void stopServer() {
-		try {
-			this.proxySocket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
