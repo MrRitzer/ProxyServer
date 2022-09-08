@@ -85,4 +85,8 @@ Temporary Items
 # Ignore code-workspaces
 *.code-workspace
 
+#Ignore cached
+/cached
+/cached/*
+
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,macos,java
