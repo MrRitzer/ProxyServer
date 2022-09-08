@@ -36,7 +36,6 @@ public class RequestHandler extends Thread {
 				connection = new Connection((request_string.split(" "))[1],RequestType.GET,clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
 			}
 			if (connection.isValid()) {
-				System.out.println(connection);
 				server.writeLog(connection.getLogEntry());
 				if (server.getCache(connection.getHost()) == null) {
 					proxyServertoClient(request_bytes);
@@ -65,19 +64,23 @@ public class RequestHandler extends Thread {
 			// to handle binary content, byte is used
 			byte[] serverReply = new byte[4096];
 			outToServer.write(clientRequest);
-			serverReply = inFromServer.readAllBytes();
-			fileWriter.write(serverReply);
+			outToServer.flush();
+			int in;
+			while((in = inFromServer.read(serverReply)) != -1) {
+				outToClient.write(serverReply, 0, in);
+				outToClient.flush();
+				fileWriter.write(serverReply, 0, in);
+				fileWriter.flush();
+			}
 			fileWriter.close();
 			inFromServer.close();
 			outToServer.close();
+			toWebServerSocket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}			
 		/**
 		 * To do
-		 * (1) Create a socket to connect to the web server (default port 80)
-		 * (2) Send client's request (clientRequest) to the web server, you may want to
-		 * use flush() after writing.
 		 * (3) Use a while loop to read all responses from web server and send back to
 		 * client
 		 * (4) Write the web server's response to a cache file, put the request URL and

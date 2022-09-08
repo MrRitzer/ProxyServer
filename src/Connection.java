@@ -1,6 +1,8 @@
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class Connection {
     private String host;
@@ -10,14 +12,36 @@ public class Connection {
     private int port;
 
     public Connection(String host, RequestType request, String address, int port) {
-        this.host = host;
+        this.host = extractURL(host);
         this.request = request;
         this.date = new Date();
         this.address = address;
         this.port = port;
     }
 
-    public Connection() { }
+    public Connection() {
+        this.host = "";
+        this.request = RequestType.NONE;
+        this.address = "";
+        this.port = -1;
+        this.date = new Date();
+    }
+
+    private String extractURL(String str) {
+        String regex
+            = "\\b((www?)."
+              + "[-a-zA-Z0-9+&@#/%?="
+              + "~_|!:, .;]*[-a-zA-Z0-9+"
+              + "&@#%=~_|])";
+
+        Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+  
+        Matcher m = p.matcher(str);
+        while (m.find()) {
+            return (str.substring(m.start(0), m.end(0)));
+        }
+        return "";
+    }
 
     public String getHost() {
         return host;
@@ -28,11 +52,7 @@ public class Connection {
     }
 
     public Boolean isValid() {
-        try {
-            return host != "" && request != RequestType.NONE;
-        } catch (Exception e) {
-            return false;
-        }
+        return host != "" && request != RequestType.NONE;
     }
 
     public String getLogEntry() {
