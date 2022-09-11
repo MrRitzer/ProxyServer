@@ -11,10 +11,13 @@ import java.nio.file.StandardOpenOption;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+
+import javax.print.attribute.standard.MediaSize.ISO;
 
 
 public class ProxyServer {
@@ -34,6 +37,19 @@ public class ProxyServer {
 		if (!cacheDir.exists() || (cacheDir.exists() && !cacheDir.isDirectory())) {
 			cacheDir.mkdirs();
 		}
+		
+		Thread clearCache = new Thread(() -> {
+			// list all the files in an array
+			File[] files = cacheDir.listFiles();
+			// delete each file from the directory
+			for(File file : files) {
+			  file.delete();
+			}
+			cacheDir.delete();
+			System.out.println("Cleared cache:");
+		});
+
+		Runtime.getRuntime().addShutdownHook(clearCache);
 
 		try {
 			proxySocket = new ServerSocket(proxyPort);
@@ -60,35 +76,17 @@ public class ProxyServer {
 	}
 
 	public synchronized void writeLog(String info) {
-
+		System.out.println(info);
         Logger logger = Logger.getLogger("ProxyLog");
-
         FileHandler proxyFileHandler;
-
         try {
-            proxyFileHandler = new FileHandler("C:/Users/salma/OneDrive/Desktop/proxy.txt");
+            proxyFileHandler = new FileHandler(logFileName);
             logger.addHandler(proxyFileHandler);
-
-            SimpleFormatter formatter = new SimpleFormatter();
-            proxyFileHandler.setFormatter(formatter);
-
-         logger.info("Hello");
+			logger.info(info);
         } catch (SecurityException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        logger.info("Hi Everyone");
-
     }
-
-
-		
-			/**
-			 * To do
-			 * write string (info) to the log file, and add the current time stamp 
-			 * e.g. String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-			 *
-			*/
-	}
+}

@@ -33,14 +33,14 @@ public class RequestHandler extends Thread {
 			int num_bytes = inFromClient.read(request_bytes);
 			String request_string = new String(request_bytes, 0, num_bytes);
 			if (request_string.contains("Host:") && request_string.contains("GET")) {
-				connection = new Connection((request_string.split(" "))[1],RequestType.GET,clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
+				connection = new Connection(request_string,RequestType.GET,clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
 			}
-			if (connection.isValid()) {
+			if (connection.isSupported()) {
 				server.writeLog(connection.getLogEntry());
-				if (server.getCache(connection.getHost()) == null) {
+				if (server.getCache(connection.getFullHostAddress()) == null) {
 					proxyServertoClient(request_bytes);
 				} else {
-					sendCachedInfoToClient(server.getCache(connection.getHost()));
+					sendCachedInfoToClient(server.getCache(connection.getFullHostAddress()));
 				}
 			}
 			// Close our connection
@@ -54,7 +54,8 @@ public class RequestHandler extends Thread {
 
 	private void proxyServertoClient(byte[] clientRequest) {
 		try {
-			Socket toWebServerSocket = new Socket(connection.getHost(),80);
+			System.out.println("Accessing from server:");
+			Socket toWebServerSocket = new Socket(connection.getHostAddress(),connection.getHostPort());
 			InputStream inFromServer = toWebServerSocket.getInputStream();
 			OutputStream outToServer = toWebServerSocket.getOutputStream();
 			// Create Buffered output stream to write to cached copy of file
@@ -72,6 +73,7 @@ public class RequestHandler extends Thread {
 				fileWriter.write(serverReply, 0, in);
 				fileWriter.flush();
 			}
+			server.putCache(connection.getFullHostAddress(),fileName);
 			fileWriter.close();
 			inFromServer.close();
 			outToServer.close();
@@ -79,19 +81,11 @@ public class RequestHandler extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}			
-		/**
-		 * To do
-		 * (3) Use a while loop to read all responses from web server and send back to
-		 * client
-		 * (4) Write the web server's response to a cache file, put the request URL and
-		 * cache file name to the cache Map
-		 * (5) close file, and sockets.
-		 */
-
 	}
 
 	// Sends the cached content stored in the cache file to the client
 	private void sendCachedInfoToClient(String fileName) {
+		System.out.println("Accessing from cache:");
 		try {
 			byte[] bytes = Files.readAllBytes(Paths.get(fileName));
 			outToClient.write(bytes);
