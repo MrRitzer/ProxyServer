@@ -1,15 +1,6 @@
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,9 +12,10 @@ import javax.print.attribute.standard.MediaSize.ISO;
 
 
 public class ProxyServer {
-	//cache is a Map: the key is the URL and the value is the file name of the file that stores the cached content
+	// cache is a Map: the key is the URL and the value is the file name of the file
+	// that stores the cached content
 	Map<String, String> cache;
-	
+
 	ServerSocket proxySocket;
 
 	Boolean running;
@@ -32,7 +24,7 @@ public class ProxyServer {
 
 	void startServer(int proxyPort) {
 		cache = new ConcurrentHashMap<>();
-		// create the directory to store cached files. 
+		// create the directory to store cached files.
 		File cacheDir = new File("cached");
 		if (!cacheDir.exists() || (cacheDir.exists() && !cacheDir.isDirectory())) {
 			cacheDir.mkdirs();
@@ -60,10 +52,10 @@ public class ProxyServer {
 		System.out.println("Listening for connection: ");
 		while (true) {
 			try {
-                new RequestHandler( proxySocket.accept(), this );
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+				new RequestHandler(proxySocket.accept(), this);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
