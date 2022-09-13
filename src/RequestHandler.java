@@ -53,7 +53,7 @@ public class RequestHandler extends Thread {
 
 	private void proxyServertoClient(byte[] clientRequest) {
 		try {
-			Socket toWebServerSocket = new Socket(connection.getHost(),80);
+			Socket toWebServerSocket = new Socket("www.google.com",80);
 			InputStream inFromServer = toWebServerSocket.getInputStream();
 			OutputStream outToServer = toWebServerSocket.getOutputStream();
 			// Create Buffered output stream to write to cached copy of file
