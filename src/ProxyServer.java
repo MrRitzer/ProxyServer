@@ -4,13 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.Level;
-
 
 public class ProxyServer {
 	// cache is a Map: the key is the URL and the value is the file name of the file
@@ -75,7 +69,7 @@ public class ProxyServer {
 
         //write the log variable using the bufferedWriter to ProxyLog.txt
         try {
-            bwriter = new BufferedWriter(new FileWriter("ProxyLog.txt", true));
+            bwriter = new BufferedWriter(new FileWriter(logFileName, true));
             bwriter.write("\n"+ log);
         } 
         catch (IOException io) {
@@ -90,27 +84,6 @@ public class ProxyServer {
             catch (IOException io) {
 				io.printStackTrace();
 			}
-            } 
-        
-
-		/*Logger logger = Logger.getLogger(ProxyServer.class.getName());
-		FileHandler proxyFileHandler;
-		logger.setLevel(Level.ALL);
-
-		try {
-			proxyFileHandler = new FileHandler("ProxyLog.txt", true);
-			logger.addHandler(proxyFileHandler);
-			logger.setLevel(Level.ALL);
-
-			SimpleFormatter formatter = new SimpleFormatter();
-			proxyFileHandler.setFormatter(formatter);
-
-              while (true) {
-                logger.info(info);
-                Thread.sleep(1000);
-				break;
-            }
-        } catch (SecurityException | IOException | InterruptedException e) {
-        } */
+		}
 	}
 }
