@@ -1,0 +1,10 @@
+
+Sep 14 2022 22:16:26 127.0.0.1 www.google.com
+Sep 14 2022 22:16:33 127.0.0.1 www.google.com
+Sep 14 2022 22:16:36 127.0.0.1 www.google.com
+Sep 14 2022 22:16:39 127.0.0.1 www.google.com
+Sep 14 2022 22:16:42 127.0.0.1 www.google.com
+Sep 14 2022 22:16:57 127.0.0.1 www.ndsu
+Sep 14 2022 22:16:57 127.0.0.1 www.google.com/images/errors/robot.png
+Sep 14 2022 22:16:57 127.0.0.1 www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png
+Sep 14 2022 22:16:57 127.0.0.1 www.ndsu/favicon.ico
