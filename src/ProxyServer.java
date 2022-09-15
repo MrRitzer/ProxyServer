@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -29,6 +30,19 @@ public class ProxyServer {
 		if (!cacheDir.exists() || (cacheDir.exists() && !cacheDir.isDirectory())) {
 			cacheDir.mkdirs();
 		}
+		
+		Thread clearCache = new Thread(() -> {
+			// list all the files in an array
+			File[] files = cacheDir.listFiles();
+			// delete each file from the directory
+			for(File file : files) {
+			  file.delete();
+			}
+			cacheDir.delete();
+			System.out.println("Cleared cache:");
+		});
+
+		Runtime.getRuntime().addShutdownHook(clearCache);
 
 		try {
 			proxySocket = new ServerSocket(proxyPort);
